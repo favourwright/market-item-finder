@@ -103,7 +103,9 @@ const handleInitAccountSelected = (value: string) => {
   form.value.account_type = value as AccountType
 }
 
+const router = useRouter()
 const handleSignup = () => {
-  console.log(form.value)
+  // console.log(form.value)
+  router.push('/accounts/fddcjhdbjsdgjs')
 }
 </script>

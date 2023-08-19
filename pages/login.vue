@@ -51,7 +51,10 @@ const form = ref({
   email: '',
   password: '',
 })
+
+const router = useRouter()
 const handleLogin = () => {
-  console.log(form.value)
+  // console.log(form.value)
+  router.push('/accounts/fddcjhdbjsdgjs')
 }
 </script>
