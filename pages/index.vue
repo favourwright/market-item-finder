@@ -31,10 +31,12 @@
                 Send notifications to store owners in markets around you from the comfort of your home
               </p>
 
-              <button class="tw-bg-black tw-text-white tw-p-4 tw-py-2.5 tw-mt-4 tw-rounded-lg">
-                <span>Create request</span>
+              <NuxtLink
+                to="/register?user_type=buyer"
+                class="tw-inline-block tw-bg-black tw-text-white tw-p-4 tw-py-2.5 tw-mt-4 tw-rounded-lg">
+                <span>Get started</span>
                 <v-icon>mdi-arrow-right</v-icon>
-              </button>
+              </NuxtLink>
             </template>
 
             <template v-if="tab===tab_list[1].slug">
@@ -46,10 +48,12 @@
               </p>
               <p class="tw-opacity-70">Once buyer accepts your offer, you can arrange for delivery or pickup</p>
 
-              <button class="tw-bg-black tw-text-white tw-p-4 tw-py-2.5 tw-mt-4 tw-rounded-lg">
+              <NuxtLink
+                to="/register?user_type=seller"
+                class="tw-inline-block tw-bg-black tw-text-white tw-p-4 tw-py-2.5 tw-mt-4 tw-rounded-lg">
                 <span>Register store</span>
                 <v-icon>mdi-arrow-right</v-icon>
-              </button>
+              </NuxtLink>
             </template>
           </div>
         </div>
@@ -119,7 +123,7 @@
     <div class="tw-px-6 sm:tw-px-10 tw-p-4 tw-max-w-7xl tw-mx-auto tw-mt-4 sm:tw-mt-10">
       <div class="tw-flex tw-flex-col sm:tw-flex-row tw-gap-10 tw-justify-between">
         <NuxtLink
-          to="/register"
+          to="/register?user_type=buyer"
           class="tw-inline-flex tw-justify-between tw-text-4xl tw-font-bold
           tw-gap-2 tw-flex-grow sm:tw-max-w-[50%] tw-border-b tw-border-black">
           <span>Register as buyer</span>
@@ -127,7 +131,7 @@
         </NuxtLink>
 
         <NuxtLink
-          to="/register"
+          to="/register?user_type=seller"
           class="tw-inline-flex tw-justify-between tw-text-4xl tw-font-bold
           tw-gap-2 tw-flex-grow sm:tw-max-w-[50%] tw-border-b tw-border-black">
           <span>Register as seller</span>
@@ -140,6 +144,21 @@
 
 <script setup lang="ts">
 import Tabs from '@/components/Tabs.vue'
+
+useHead({
+  title: 'iMarket Finder',
+  meta: [
+    { name: 'description', content: 'Market Item Finder is a platform that helps you find items you are looking for in the market' },
+    { name: 'og:title', content: 'iMarket Finder' },
+    { name: 'og:description', content: 'Market Item Finder is a platform that helps you find items you are looking for in the market' },
+    { name: 'og:image', content: 'https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-antonio-sokic-3839432.jpg?alt=media&token=47151f3e-2eb1-4147-83d5-96a3bbccff70' },
+    { name: 'og:url', content: 'https://imarket-finder.netlify.app/' },
+    { name: 'twitter:title', content: 'iMarket Finder' },
+    { name: 'twitter:description', content: 'Market Item Finder is a platform that helps you find items you are looking for in the market' },
+    { name: 'twitter:image', content: 'https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-antonio-sokic-3839432.jpg?alt=media&token=47151f3e-2eb1-4147-83d5-96a3bbccff70' },
+    { name: 'twitter:url', content: 'https://imarket-finder.netlify.app/' },
+  ],
+})
 
 const carousel = ref(0)
 const images: string[] = [

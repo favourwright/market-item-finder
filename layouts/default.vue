@@ -2,7 +2,7 @@
   <div class="tw-flex tw-flex-col tw-items-center tw-min-h-screen">
     <header
       class="tw-w-full tw-bg-black tw-text-white">
-      <div class="tw-px-10 tw-p-4 tw-max-w-7xl tw-mx-auto tw-flex tw-justify-between tw-items-center">
+      <div class="tw-px-6 sm:tw-px-10 tw-p-4 tw-max-w-7xl tw-mx-auto tw-flex tw-justify-between tw-items-center">
         <!-- logo -->
         <div class="tw-flex tw-items-center tw-gap-10">
           <span class="tw-select-none tw-relative">
@@ -22,6 +22,7 @@
             Login
           </NuxtLink>
           <NuxtLink
+            to="/register"
             class="tw-inline-block tw-p-1 tw-px-3 tw-rounded-full tw-bg-white
             tw-select-none tw-text-black hover:tw-bg-white/80
             tw-transition-all tw-duration-300">
