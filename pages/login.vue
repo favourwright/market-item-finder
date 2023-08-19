@@ -11,6 +11,7 @@
                 <input
                   type="email"
                   placeholder="email@example.com"
+                  :required="true"
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
               </label>
 
@@ -19,6 +20,7 @@
                 <input
                   type="password"
                   placeholder="******"
+                  :required="true"
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
               </label>
 

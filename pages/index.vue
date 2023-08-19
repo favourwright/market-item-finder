@@ -75,23 +75,27 @@
       <h1 class="tw-text-4xl tw-font-bold">Focus on sales, let us forcus on bringing you customers</h1>
 
       <div class="tw-grid sm:tw-grid-cols-2 tw-gap-6 tw-mt-4">
-        <div class="tw-space-y-2">
-          <div class="tw-aspect-[3/2] tw-bg-black">
+        <div class="tw-space-y-2 tw-bg-black tw-text-white">
+          <div class="tw-aspect-[3/2]">
             <img src="https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-kampus-production-8475118.jpg?alt=media&token=6bdde53b-ac6e-4466-95d1-af15fc28d5d3" class="tw-h-full tw-w-full tw-object-cover">
           </div>
-          <h3 class="tw-font-semibold tw-text-lg">We exist for you</h3>
-          <p>Our plan is to increase your sales by 400%</p>
+          <div class="tw-p-4">
+            <h3 class="tw-font-semibold tw-text-lg">We exist for you</h3>
+            <p>Our plan is to increase your sales by 400%</p>
+          </div>
         </div>
 
-        <div class="tw-space-y-2">
-          <div class="tw-aspect-[3/2] tw-bg-black">
+        <div class="tw-space-y-2 tw-bg-black tw-text-white">
+          <div class="tw-aspect-[3/2]">
             <img src="https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-laura-james-6097813.jpg?alt=media&token=a41967af-aef4-42f8-92f1-c45535df349a" class="tw-h-full tw-w-full tw-object-cover">
           </div>
-          <h3 class="tw-font-semibold tw-text-lg">We value your Time too</h3>
-          <p>
-            Why not reduce the fruitless searching for that item you are looking for on the market
-            by publishing your shopping list and recieving price quotes from store owners that have your item
-          </p>
+          <div class="tw-p-4">
+            <h3 class="tw-font-semibold tw-text-lg">We value your Time too</h3>
+            <p>
+              Why not reduce the fruitless searching for that item you are looking for on the market
+              by publishing your shopping list and recieving price quotes from store owners that have your item
+            </p>
+          </div>
         </div>
       </div>
     </div>

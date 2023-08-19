@@ -15,6 +15,7 @@
                 <input
                   type="email"
                   placeholder="email@example.com"
+                  :required="true"
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
               </label>
 
@@ -23,6 +24,7 @@
                 <input
                   type="password"
                   placeholder="******"
+                  :required="true"
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
               </label>
 
@@ -32,6 +34,7 @@
                   type="radio"
                   name="account-type"
                   :value="AccountType.BUYER"
+                  :required="true"
                   class="tw-appearance-none tw-peer">
                 <div
                   class="tw-border-2 peer-checked:tw-border-black tw-text-gray-300 peer-checked:tw-text-black
@@ -47,6 +50,7 @@
                   type="radio"
                   name="account-type"
                   :value="AccountType.SELLER"
+                  :required="true"
                   class="tw-appearance-none tw-peer">
                 <div
                   class="tw-border-2 peer-checked:tw-border-black tw-text-gray-300 peer-checked:tw-text-black
