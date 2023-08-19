@@ -38,7 +38,7 @@
     <footer class="tw-max-w-7xl tw-w-full tw-mx-auto tw-px-6 sm:tw-px-10 tw-p-10">
       <div>
         <div class="tw-select-none">
-          <span class="tw-font-black tw-text-gray-600 tw-tracking-tighter tw-text-6xl">
+          <span class="tw-font-black tw-text-gray-200 tw-tracking-tighter tw-text-6xl">
             {{ env.appName }}
           </span>
         </div>
