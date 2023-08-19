@@ -61,7 +61,6 @@
                 Create account
               </button>
             </form>
-            <!-- {{ tab }} -->
           </div>
         </div>
       </div>

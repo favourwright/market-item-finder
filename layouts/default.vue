@@ -18,6 +18,7 @@
   
         <div class="tw-space-x-2">
           <NuxtLink
+            to="/login"
             class="tw-inline-block tw-p-1 tw-select-none">
             Login
           </NuxtLink>
@@ -47,7 +48,7 @@
       <hr class="tw-max-w-7xl tw-w-full tw-mx-auto tw-mb-20 tw-mt-10">
       <div>
         <span class="tw-text-xs tw-text-gray-500">&copy;{{ env.appName }} 2023 | All rights reserved.</span>
-        <div class="tw-flex tw-justify-between tw-text-sm">
+        <div class="tw-flex tw-justify-between tw-items-end tw-text-sm">
           <div class="tw-space-x-4 tw-mt-3">
             <NuxtLink to="/">Terms of use</NuxtLink>
           </div>
