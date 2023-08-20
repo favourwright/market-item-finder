@@ -12,14 +12,13 @@ export default defineNuxtConfig({
     // ensures the auth module is enabled
     auth: true,
     config: {
-      apiKey: "AIzaSyCSQO1pWYDLA8etQEllvb2_sVT0MMnyWM0",
-      authDomain: "market-linkage-732c2.firebaseapp.com",
-      projectId: "market-linkage-732c2",
-      storageBucket: "market-linkage-732c2.appspot.com",
-      messagingSenderId: "208499476732",
-      appId: "1:208499476732:web:984cd0a35c54e692912f79",
-      measurementId: "G-XMT3P8MG4K"
-      // there could be other properties depending on the project
+      apiKey: "AIzaSyDicMR3nRrUkah2AXM6k9gHtmZrhjwQG8g",
+      authDomain: "i-get-am.firebaseapp.com",
+      projectId: "i-get-am",
+      storageBucket: "i-get-am.appspot.com",
+      messagingSenderId: "643431621926",
+      appId: "1:643431621926:web:e738297b217a4036a2cde7",
+      measurementId: "G-L33X26DC3F"
     },
   },
   ssr: false,
