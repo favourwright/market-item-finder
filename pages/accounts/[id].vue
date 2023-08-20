@@ -2,6 +2,17 @@
   <div class="tw-max-w-7xl tw-mx-auto">
     <div class="tw-p-6 sm:tw-p-10">
       <FinalizeRegistration v-model="isCompleted" class="tw-mb-6" />
+
+      <div class="tw-mb-6">
+        <!-- v-if="isCompleted" -->
+        <NuxtLink
+          to="/requests/create"
+          class="tw-inline-block tw-p-4 tw-px-6 tw-rounded-full tw-bg-black
+          tw-select-none tw-text-white hover:tw-bg-black/80
+          tw-transition-all tw-duration-300 tw-font-black">
+          Request for an item
+        </NuxtLink>
+      </div>
       
       <div>
         <Tabs
@@ -22,6 +33,23 @@
             </div>
           </template>
         </Tabs>
+
+        <div class="tw-mt-6">
+          <div v-show="tab==='active'" class="tw-grid tw-gap-3">
+            <RequestItem
+              itemName="iPhone 12 Pro Max"
+              :lifecycle="RequestLifecycle.ACCEPTED_BY_BUYER" v-for="n in 3"
+            />
+          </div>
+          
+          <div v-show="tab==='completed'" class="tw-grid tw-gap-3">
+            <RequestItem
+              itemName="Plastic spatula"
+              :lifecycle="RequestLifecycle.COMPLETED" v-for="n in 7"
+              :is-completed="true"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -30,12 +58,21 @@
 <script setup lang="ts">
 import FinalizeRegistration from '@/components/FinalizeRegistration.vue'
 import Tabs from '@/components/Tabs.vue';
-
+import RequestItem from '@/components/RequestItem.vue';
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
+import { RequestLifecycle } from '@/types'
+
+useHead({
+  title: 'iMarket Finder - Your account',
+})
+definePageMeta({
+  middleware: 'auth',
+  requiresAuth: true,
+})
 
 const route = useRoute()
-console.log(route.params.id)
+// console.log(route.params.id)
 
 const isCompleted = ref(false)
 
