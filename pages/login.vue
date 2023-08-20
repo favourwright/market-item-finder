@@ -9,6 +9,7 @@
               <label class="tw-relative tw-block">
                 <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Enter your email</span>
                 <input
+                  v-model="form.email"
                   type="email"
                   placeholder="email@example.com"
                   :required="true"
@@ -18,6 +19,7 @@
               <label class="tw-relative tw-mt-4 tw-block">
                 <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Enter your password</span>
                 <input
+                  v-model="form.password"
                   type="password"
                   placeholder="******"
                   :required="true"
@@ -25,8 +27,17 @@
               </label>
 
               <button
-                class="tw-w-full tw-bg-black tw-text-white tw-py-4 tw-mt-10 tw-rounded-md tw-font-medium">
-                Login
+                class="tw-w-full tw-bg-black tw-text-white tw-py-4 tw-mt-10 tw-rounded-md tw-font-medium"
+                :disabled="logingIn">
+                <template v-if="!logingIn">
+                  Login
+                </template>
+                <v-progress-circular
+                  v-else
+                  indeterminate
+                  color="white"
+                  size="20" width="2">
+                </v-progress-circular>
               </button>
             </form>
           </div>
@@ -35,16 +46,29 @@
 
       <div class="tw-hidden lg:tw-block tw-h-[calc(100vh-80px)] tw-bg-gray-50">
         <img
-          src="https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-laura-james-6097813.jpg?alt=media&token=93c36879-cf6d-42d9-a649-36d596582040"
+          src="https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/pexels-laura-james-6097813.jpg?alt=media&token=87a84a9c-2917-4502-84b9-6d1d032b0770"
           class="tw-w-full tw-h-full tw-object-cover tw-object-top">
       </div>
     </div>
+
+    <v-snackbar
+      v-model="snackbar.show">
+      {{ snackbar.text }}
+    </v-snackbar>
   </div>
 </template>
 
 <script setup lang="ts">
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getDoc, doc } from 'firebase/firestore';
+import { useFirebaseAuth, useFirestore } from 'vuefire'
+import { User } from 'types';
+
 useHead({
-  title: 'iMarket Finder - Register',
+  title: 'iMarket Finder - Login',
+})
+definePageMeta({
+  middleware: 'guest',
 })
 
 const form = ref({
@@ -52,9 +76,54 @@ const form = ref({
   password: '',
 })
 
+const snackbar = ref({
+  show: false,
+  text: ''
+})
+
+const auth = useFirebaseAuth()! // only exists on client side
+const db = useFirestore()
+
 const router = useRouter()
+const logingIn = ref(false)
+const userCookie = useCookie<User>('user')
 const handleLogin = () => {
-  // console.log(form.value)
-  router.push('/accounts/fddcjhdbjsdgjs')
+  logingIn.value = true
+  signInWithEmailAndPassword(auth, form.value.email, form.value.password)
+    .then(async (userCredential) => {
+      const user = userCredential.user
+      if (user) {
+        const userFromFirestore = await getUserFromFirstore(user.email!)
+        if (userFromFirestore) {
+          userCookie.value = userFromFirestore
+          router.push('/accounts/'+ user.uid)
+        } else {
+          snackbar.value = {
+            show: true,
+            text: 'Ok, this is weird. We could not find your account in our database. Please contact support'
+          }
+        }
+      }
+    })
+    .catch((error) => {
+      const errorCode = error.code
+      const errorMessage = error.message
+      snackbar.value = {
+        show: true,
+        text: errorCode==='auth/user-not-found' ?
+          'User not found' :
+          errorMessage
+      }
+    })
+    .finally(()=>logingIn.value = false)
+}
+
+const getUserFromFirstore = async (email: string) => {
+  const userRef = doc(db, 'users', email)
+  const userSnap = await getDoc(userRef)
+  if (userSnap.exists()) {
+    return userSnap.data() as User
+  }
+  return null
 }
 </script>
