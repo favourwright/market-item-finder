@@ -1,3 +1,0 @@
-<template>
-  requests list
-</template>
