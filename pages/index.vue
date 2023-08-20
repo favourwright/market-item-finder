@@ -48,12 +48,14 @@
               </p>
               <p class="tw-opacity-70">Once buyer accepts your offer, you can arrange for delivery or pickup</p>
 
-              <NuxtLink
-                to="/register?user_type=seller"
+              <button
+                @click="handleSellerBtnClick"
                 class="tw-inline-block tw-bg-black tw-text-white tw-p-4 tw-py-2.5 tw-mt-4 tw-rounded-lg">
-                <span>Register store</span>
+                <span>
+                  {{ isSeller ? 'View Active Requests' : (isBuyer ? 'We\'ll log you out from this account' : 'Register store') }}
+                  </span>
                 <v-icon>mdi-arrow-right</v-icon>
-              </NuxtLink>
+              </button>
             </template>
           </div>
         </div>
@@ -77,7 +79,7 @@
       <div class="tw-grid sm:tw-grid-cols-2 tw-gap-6 tw-mt-4">
         <div class="tw-space-y-2 tw-bg-black tw-text-white">
           <div class="tw-aspect-[3/2]">
-            <img src="https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-kampus-production-8475118.jpg?alt=media&token=6bdde53b-ac6e-4466-95d1-af15fc28d5d3" class="tw-h-full tw-w-full tw-object-cover">
+            <img src="https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/pexels-kampus-production-8475118.jpg?alt=media&token=2094497d-3d13-406f-a9bb-0411e46895ca" class="tw-h-full tw-w-full tw-object-cover">
           </div>
           <div class="tw-p-4">
             <h3 class="tw-font-semibold tw-text-lg">We exist for you</h3>
@@ -87,7 +89,7 @@
 
         <div class="tw-space-y-2 tw-bg-black tw-text-white">
           <div class="tw-aspect-[3/2]">
-            <img src="https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-laura-james-6097813.jpg?alt=media&token=a41967af-aef4-42f8-92f1-c45535df349a" class="tw-h-full tw-w-full tw-object-cover">
+            <img src="https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/pexels-laura-james-6097813.jpg?alt=media&token=87a84a9c-2917-4502-84b9-6d1d032b0770" class="tw-h-full tw-w-full tw-object-cover">
           </div>
           <div class="tw-p-4">
             <h3 class="tw-font-semibold tw-text-lg">We value your Time too</h3>
@@ -148,6 +150,8 @@
 
 <script setup lang="ts">
 import Tabs from '@/components/Tabs.vue'
+import { signOut } from 'firebase/auth'
+import { User, AccountType } from '@/types'
 
 useHead({
   title: 'iMarket Finder',
@@ -166,8 +170,8 @@ useHead({
 
 const carousel = ref(0)
 const images: string[] = [
-  'https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-porapak-apichodilok-346746.jpg?alt=media&token=5d03dc8c-5845-4723-ae01-884c274b0b0b',
-  'https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/pexels-antonio-sokic-3839432.jpg?alt=media&token=47151f3e-2eb1-4147-83d5-96a3bbccff70',
+  'https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/pexels-porapak-apichodilok-346746.jpg?alt=media&token=e5d743c3-4535-4de0-b7fb-d5fa161ab98f',
+  'https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/pexels-antonio-sokic-3839432.jpg?alt=media&token=10b06197-c399-4ded-b492-5de4db556f5b',
 ]
 
 const tab = ref()
@@ -181,5 +185,26 @@ const tab_list:{ name: string, slug: string, icon: string }[] = [
 const handleTabSwitch = (activeTab: string) => {
   tab.value = activeTab
   carousel.value = tab_list.findIndex((t) => t.slug === tab.value)
+}
+
+const userCookie = useCookie<User>('user')
+const isSeller = computed(() => userCookie.value?.accountType === AccountType.SELLER)
+const isBuyer = computed(() => userCookie.value?.accountType === AccountType.BUYER)
+
+// :to="isSeller ? '/requests' : (isBuyer ? '' : '/register?user_type=seller')"
+const router = useRouter()
+const auth = useFirebaseAuth() // only exists on client side
+
+const handleSellerBtnClick = async () => {
+  if (isSeller.value) {
+    router.push('/requests')
+    return
+  } else if (isBuyer.value) {
+    await signOut(auth!).then(() => {
+      userCookie.value = null as unknown as User
+    })
+  }
+  router.push('/register?user_type=seller')
+
 }
 </script>
