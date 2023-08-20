@@ -3,14 +3,32 @@ export enum AccountType {
   SELLER = 'seller'
 }
 
+export interface Location {
+  state: string | null
+  lga: string | null
+  market?: string | null
+}
 export interface User {
-  id: string
-  firstname: string
-  lastname: string
+  id?: string
+  username: string | null
   email: string
-  password: string
-  phone: string
-  location: string
+  password?: string | null
+  phone: string | null
+  location: Location
   createdAt: Date
   accountType: AccountType
+  stores: Store[] | null
+}
+export interface Store {
+  name: string
+  description?: string
+  location: Location
+}
+
+export enum RequestLifecycle {
+  PENDING = 'pending',
+  ACCEPTED_BY_SELLER = 'accepted_by_seller',
+  ACCEPTED_BY_BUYER = 'accepted_by_buyer',
+  REQUEST_LOCKED = 'request_locked',
+  COMPLETED = 'completed',
 }

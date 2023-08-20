@@ -4,7 +4,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // user is logged in, redirect to home page
   if (user) {
     return navigateTo({
-      path: '/',
+      path: `/accounts/${user.uid}`,
       query: {
         redirect: to.fullPath,
       },
