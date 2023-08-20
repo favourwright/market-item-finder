@@ -29,6 +29,7 @@
               <label class="tw-relative tw-block">
                 <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What do we call you?</span>
                 <input
+                  v-model="form.username"
                   type="text"
                   placeholder="Arya Stark"
                   :required="true"
@@ -36,31 +37,21 @@
               </label>
   
               <label class="tw-relative tw-mt-4 tw-block">
-                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Contact number</span>
+                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">
+                  Contact number {{ accountType===AccountType.SELLER ? '' : '(optional)' }}
+                </span>
                 <input
-                  type="number"
-                  placeholder="+234 901 2345 678"
-                  :required="true"
-                  class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
-              </label>
-  
-              <fieldset class="tw-border-t-4 tw-my-10">
-                <legend class="tw-px-4 tw-text-center">
-                  <h2 class="tw-text-gray-600">About your store</h2>
-                </legend>
-              </fieldset>
-  
-              <label class="tw-relative tw-block">
-                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What is your store name?</span>
-                <input
+                  v-model="form.phone"
                   type="text"
-                  placeholder="Arya's Clothing"
-                  :required="true"
+                  placeholder="+234 901 2345 678"
+                  :required="accountType===AccountType.SELLER"
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
               </label>
 
-              <div class="tw-flex tw-bg-gray-100 tw-mt-4 tw-relative tw-rounded-lg">
-                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What is your store address?</span>
+              <div
+                v-if="accountType===AccountType.BUYER"
+                class="tw-flex tw-bg-gray-100 tw-mt-4 tw-relative tw-rounded-lg">
+                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What is your location?</span>
                 <label for="state" class="tw-block tw-flex-grow sm:tw-max-w-[50%]">
                   <select
                     v-model="form.state"
@@ -82,30 +73,81 @@
                   </select>
                 </label>
               </div>
-              
-              <label v-show="!!form.lga" for="lga" class="tw-block tw-mt-4 tw-relative">
-                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What market is store in</span>
-                <select
-                  v-model="form.market"
-                  class="tw-block tw-w-full tw-outline-none tw-p-4 tw-pt-7 tw-capitalize
-                  placeholder:tw-text-gray-700 tw-bg-gray-100 tw-rounded-lg"
-                  name="lga" id="lga" :required="false">
-                  <option value="">SELECT MARKET</option>
-                  <option v-for="(market,i) in marketsInActiveLga" :key="i" :value="market">{{ market }}</option>
-                </select>
-              </label>
-              
-              <small
-                v-if="!!form.lga && !marketsInActiveLga.length"
-                class="tw-bg-black tw-text-white tw-px-1 tw-mt-2">
-                <v-icon size="20">mdi-alert-circle</v-icon>
-                Seems like we haven't added your market yet. Please contact us to add it.
-              </small>
+  
+              <template v-if="accountType===AccountType.SELLER">
+                <fieldset class="tw-border-t-4 tw-my-10">
+                  <legend class="tw-px-4 tw-text-center">
+                    <h2 class="tw-text-gray-600">About your store</h2>
+                  </legend>
+                </fieldset>
+    
+                <label class="tw-relative tw-block">
+                  <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What is your store name?</span>
+                  <input
+                    v-model="form.storeName"
+                    type="text"
+                    placeholder="Arya's Clothing"
+                    :required="true"
+                    class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
+                </label>
+  
+                <div class="tw-flex tw-bg-gray-100 tw-mt-4 tw-relative tw-rounded-lg">
+                  <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What is your store address?</span>
+                  <label for="state" class="tw-block tw-flex-grow sm:tw-max-w-[50%]">
+                    <select
+                      v-model="form.state"
+                      class="tw-block tw-w-full tw-outline-none tw-p-4 tw-pt-7 tw-capitalize 
+                      placeholder:tw-text-gray-700"
+                      name="state" id="state" :required="true">
+                      <option value="">SELECT STATE</option>
+                      <option v-for="(state,i) in stateNames" :key="i" :value="state">{{ state }}</option>
+                    </select>
+                  </label>
+                  <label for="lga" class="tw-block tw-border-l-2 tw-flex-grow sm:tw-max-w-[50%]">
+                    <select
+                      v-model="form.lga"
+                      class="tw-block tw-w-full tw-outline-none tw-p-4 tw-pt-7 tw-capitalize
+                      placeholder:tw-text-gray-700"
+                      name="lga" id="lga" :required="true">
+                      <option value="">SELECT LGA</option>
+                      <option v-for="(lga,i) in activeLgas" :key="i" :value="lga">{{ lga }}</option>
+                    </select>
+                  </label>
+                </div>
+                
+                <label v-show="!!form.lga" for="lga" class="tw-block tw-mt-4 tw-relative">
+                  <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What market is store in</span>
+                  <select
+                    v-model="form.market"
+                    class="tw-block tw-w-full tw-outline-none tw-p-4 tw-pt-7 tw-capitalize
+                    placeholder:tw-text-gray-700 tw-bg-gray-100 tw-rounded-lg"
+                    name="lga" id="lga" :required="false">
+                    <option value="">SELECT MARKET</option>
+                    <option v-for="(market,i) in marketsInActiveLga" :key="i" :value="market">{{ market }}</option>
+                  </select>
+                </label>
+                
+                <small
+                  v-if="!!form.lga && !marketsInActiveLga.length"
+                  class="tw-bg-black tw-text-white tw-px-1 tw-mt-2">
+                  <v-icon size="20">mdi-alert-circle</v-icon>
+                  Seems like we haven't added your market yet. Please contact us to add it.
+                </small>
+              </template>
             </div>
 
             <button
-              class="tw-w-full tw-bg-black tw-text-white tw-py-4 tw-mt-10 tw-rounded-md tw-font-medium">
-              Finish
+              class="tw-w-full tw-bg-black tw-text-white tw-py-4 tw-mt-10 tw-rounded-md tw-font-medium"
+              :disabled="submiting">
+              <template v-if="!submiting">
+                Finish
+              </template>
+              <v-progress-circular
+                v-else
+                indeterminate
+                color="white"
+                size="20" width="2">
+              </v-progress-circular>
             </button>
           </form>
         </div>
@@ -115,26 +157,38 @@
 </template>
 
 <script setup lang="ts">
-import { AccountType } from '@/types';
+import { AccountType, Location, Store, User } from '@/types';
 import { ref } from 'vue'
 import states from '@/nigerian-states.json'
+import { doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { useFirebaseAuth, useFirestore } from 'vuefire'
 
 interface Props {
   modelValue: boolean
+  accountType: AccountType
 }
 const props = defineProps<Props>()
 const emit = defineEmits(['update:modelValue'])
 
-const isCompleted = ref(false)
 const modal = ref(false)
-
-const form = ref({
-  email: '',
-  password: '',
-  account_type: '' as AccountType,
+const form = ref<{
+  username:string
+  phone: string | null
+  storeName?: string | null
+  state?: string
+  lga?: string
+  market?: string
+  stores?: Store[] | null
+  location?: Location | null
+}>({
+  username: '',
+  phone: null,
+  storeName: null,
   state: '',
   lga: '',
   market: '',
+  stores: null,
+  location: null,
 })
 
 const statesAndLga = states as {
@@ -204,8 +258,59 @@ watch(()=>form.value.lga, (value)=>{
   form.value.market = ''
 })
 
-const handleFinalSignup = () => {
-  isCompleted.value = true
+const auth = useFirebaseAuth()! // only exists on client side
+const db = useFirestore()
+const user = useCurrentUser()
+const userCookie = useCookie<User>('user')
+
+const submiting = ref(false)
+const handleFinalSignup = async () => {
+  submiting.value = true
+  const userRef = doc(db, "users", user.value?.email!)
+  const payload = {
+    ...form.value,
+    updatedAt: Timestamp.now(),
+  }
+  if(props.accountType === AccountType.BUYER) {
+    // empty unnecessary fields
+    payload.phone = !!form.value.phone ? form.value.phone : null
+    payload.location = {
+      state: form.value.state!,
+      lga: form.value.lga!,
+    }
+    delete payload.stores
+  } else {
+    // seller payload
+    delete payload.location
+    payload.stores = [
+      {
+        name: form.value.storeName!,
+        location: {
+          state: form.value.state!,
+          lga: form.value.lga!,
+          market: form.value.market!,
+        }
+      }
+    ]
+  }
+  delete payload.market
+  delete payload.state
+  delete payload.lga
+  delete payload.storeName
+
+  await updateDoc(userRef, payload)
+  const temp = userCookie.value
+  // delete user cookie with vanilla js because useCookie was not working
+  document.cookie = `user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+  // set new cookie with updated info
+  document.cookie = `user=${JSON.stringify({
+    ...temp,
+    username: payload.username,
+    phone: payload.phone,
+  })}; path=/;`
+
+  emit('update:modelValue', true)
+  submiting.value = false
   modal.value = false
 }
 </script>

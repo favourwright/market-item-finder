@@ -1,10 +1,13 @@
 <template>
   <div class="tw-max-w-7xl tw-mx-auto">
     <div class="tw-p-6 sm:tw-p-10">
-      <FinalizeRegistration v-model="isCompleted" class="tw-mb-6" />
+      <FinalizeRegistration
+        v-if="!isCompletedNow && !isCompleted"
+        :accountType="userCookie?.accountType"
+        v-model="isCompletedNow" class="tw-mb-6"
+      />
 
-      <div class="tw-mb-6">
-        <!-- v-if="isCompleted" -->
+      <div v-if="isBuyer" class="tw-mb-6">
         <NuxtLink
           to="/requests/create"
           class="tw-inline-block tw-p-4 tw-px-6 tw-rounded-full tw-bg-black
@@ -17,7 +20,6 @@
       <div>
         <Tabs
           :tab_list="tab_list"
-          query_name="user_type"
           :value="tab"
           @model-value="($event) => tab = $event"
           class="tw-inline-flex tw-gap-x-1 sm:tw-gap-x-2 tw-justify-between
@@ -45,7 +47,7 @@
           <div v-show="tab==='completed'" class="tw-grid tw-gap-3">
             <RequestItem
               itemName="Plastic spatula"
-              :lifecycle="RequestLifecycle.COMPLETED" v-for="n in 7"
+              :lifecycle="RequestLifecycle.COMPLETED"
               :is-completed="true"
             />
           </div>
@@ -60,8 +62,8 @@ import FinalizeRegistration from '@/components/FinalizeRegistration.vue'
 import Tabs from '@/components/Tabs.vue';
 import RequestItem from '@/components/RequestItem.vue';
 import { useRoute } from 'vue-router'
-import { ref } from 'vue'
-import { RequestLifecycle } from '@/types'
+import { ref, computed } from 'vue'
+import { RequestLifecycle, AccountType, User } from '@/types'
 
 useHead({
   title: 'iMarket Finder - Your account',
@@ -74,7 +76,8 @@ definePageMeta({
 const route = useRoute()
 // console.log(route.params.id)
 
-const isCompleted = ref(false)
+const isCompletedNow = ref(false)
+const isCompleted = computed(()=>!!userCookie.value?.username)
 
 const tab = ref()
 const tab_list = ref<{ name: string, slug: string, icon: string }[]>([
@@ -83,4 +86,8 @@ const tab_list = ref<{ name: string, slug: string, icon: string }[]>([
   { name: 'Requests I fulfilled', slug: 'completed', icon: 'mdi-cube-send' }, // seller
   // { name: 'Completed requests', slug: 'completed', icon: 'mdi-cube-send' },
 ])
+
+const userCookie = useCookie<User>('user')
+const isSeller = computed(() => userCookie.value?.accountType === AccountType.SELLER)
+const isBuyer = computed(() => userCookie.value?.accountType === AccountType.BUYER) 
 </script>
