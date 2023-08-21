@@ -2,7 +2,8 @@
   <div class="tw-relative">
     <div
       :class="{ 'tw-text-gray-400 !tw-border-black/5': completed }"
-      class="tw-border-2 tw-border-black/10 tw-relative tw-z-10 tw-bg-white">
+      class="tw-border-2 tw-border-black/10 tw-relative tw-z-10 tw-bg-white
+      tw-group tw-overflow-hidden">
       <div class="tw-p-2">
         <div class="sm:tw-flex">
           <div class="tw-flex-grow tw-flex tw-gap-2">
@@ -21,7 +22,7 @@
               <template v-if="lifecycle===RequestLifecycle.REQUEST_LOCKED || lifecycle===RequestLifecycle.COMPLETED">
                 <p class="tw-text-sm">Buyer: {{ buyer?.username }}</p>
                 <p class="tw-text-sm">Seller: {{ lockedSeller?.username }}</p>
-                <p class="tw-text-sm">Price: {{ sellersPriceQuote }}</p>
+                <p class="tw-text-sm">Price: ₦{{ Number(sellersPriceQuote).toLocaleString() }}</p>
               </template>
             </div>
           </div>
@@ -69,6 +70,19 @@
             <span>{{ lifecycle===RequestLifecycle.REQUEST_LOCKED ? 'locked' : 'locks in 15mins' }}</span>
           </div>
         </div>
+      </div>
+
+      <div
+        class="tw-absolute tw-inset-y-0 tw-right-0 tw-pointer-events-none
+        tw-translate-x-full group-hover:tw-translate-x-0
+        tw-transition-all tw-duration-300 tw-flex tw-items-center tw-justify-center
+        [&>*]:tw-ring-2 [&>*]:tw-ring-white/80 tw-select-none tw-pr-2">
+        <NuxtLink
+          :to="`/requests/${requestId}`"
+          class="tw-bg-black tw-text-white tw-p-2 tw-py-1 tw-rounded-md
+          tw-pointer-events-auto">
+          <v-icon>mdi-eye</v-icon>
+        </NuxtLink>
       </div>
     </div>
 
