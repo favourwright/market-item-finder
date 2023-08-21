@@ -63,7 +63,7 @@
               </p>
             </div>
           </div>
-          
+
           <div
             :class="{ 'tw-hidden sm:tw-block': tab !== tab_list[1].slug }"
             class="sm:tw-col-span-1">
@@ -109,9 +109,16 @@ const fetchUserRequests = async () => {
   const db = getDatabase();
   const myRequestsRef = RTDBRef(db, 'requests/'+route.params.id)
   onValue(myRequestsRef, (snapshot) => {
+
     const data = {
       ...snapshot.val(),
       id: snapshot.key
+    }
+    // if user is not a seller and not the current user, they shouldn't
+    // be able to view this request
+    if((data.buyerId !== userCookie.value?.id) && !isSeller.value){
+      router.push('/')
+      return
     }
     requestDetails.value = data
   });
