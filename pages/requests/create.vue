@@ -5,7 +5,7 @@
         :to="'/accounts/'+user?.uid"
         class="tw-text-xl tw-font-medium tw-inline-flex tw-items-center tw-gap-2">
         <v-icon>mdi-chevron-left</v-icon>
-        <span>Back to requests</span>
+        <span>Back</span>
       </NuxtLink>
 
       <h1 class="tw-text-5xl tw-font-bold tw-mt-4">New request creation</h1>
@@ -14,7 +14,7 @@
       </p>
 
       <form @submit.prevent="handleNewRequest" class="tw-text-2xl">
-        <div class="tw-grid tw-grid-cols-3 tw-gap-10 tw-mt-6">
+        <div class="tw-grid tw-grid-cols-3 tw-items-end tw-gap-10 tw-mt-6">
           <div class="tw-col-span-3 sm:tw-col-span-2 tw-row-start-1">
             <label class="tw-relative tw-block">
               <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Name of item</span>
@@ -38,7 +38,7 @@
             </label>
 
             <div class="tw-flex tw-bg-gray-100 tw-mt-4 tw-relative tw-rounded-lg">
-              <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What is your store address?</span>
+              <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What state are you searching?</span>
               <label for="state" class="tw-block tw-flex-grow sm:tw-max-w-[50%]">
                 <select
                   v-model="form.state"
@@ -62,7 +62,7 @@
             </div>
             
             <label v-show="!!form.lga" for="lga" class="tw-block tw-mt-4 tw-relative">
-              <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What market is store in</span>
+              <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">What market should we notify</span>
               <select
                 v-model="form.market"
                 class="tw-block tw-w-full tw-outline-none tw-p-4 tw-pt-7 tw-capitalize
@@ -72,13 +72,19 @@
                 <option v-for="(market,i) in marketsInActiveLga" :key="i" :value="market">{{ market }}</option>
               </select>
             </label>
+            <small
+              v-if="!!form.lga && !marketsInActiveLga.length"
+              class="tw-bg-black tw-text-white tw-px-1 tw-mt-2 tw-leading-tight">
+              <v-icon size="20">mdi-alert-circle</v-icon>
+              Seems like we haven't added markets in this area. Please contact us to add it.
+            </small>
           </div>
 
           <button
             class="tw-w-full tw-bg-black tw-text-white tw-py-4 tw-rounded-md tw-font-medium
             tw-row-start-4 sm:tw-row-start-2 tw-col-start-1 tw-col-span-full sm:tw-col-span-2
             disabled:tw-bg-black/20"
-            :disabled="submiting">
+            :disabled="submiting || uploadingImage">
             <template v-if="!submiting">
               Create!
             </template>
@@ -91,57 +97,77 @@
           </button>
 
           <div class="tw-col-span-3 sm:tw-col-span-1">
-            <div class="tw-h-[300px] tw-bg-gray-100 tw-rounded-lg tw-overflow-hidden">
+            <div class="tw-h-[300px] tw-bg-gray-100 tw-relative tw-rounded-lg tw-overflow-hidden">
               <v-col class="tw-h-full pa-0">
                 <ClientOnly>
                   <v-carousel v-model="carousel" cycle :show-arrows="true"
                     hide-delimiter-background hide-delimiters height="100%">
-                    <v-carousel-item ripple v-for="(image, n) in spatularImages" :key="n" :src="image" cover>
+                    <v-carousel-item ripple v-for="(image, n) in renderedCarouselImages" :key="n" :src="image" cover>
                     </v-carousel-item>
                   </v-carousel>
                 </ClientOnly>
               </v-col>
+
+              <!-- image upload progress -->
+              <div class="tw-absolute tw-inset-0 tw-flex tw-items-end tw-pointer-events-none">
+                <div v-show="!readyForAnotherUpload" class="tw-h-4 tw-w-full">
+                  <div
+                    :style="`width: ${Number(uploadProgress)*100}%`"
+                    class="tw-w-0 tw-h-full tw-bg-black/90 tw-transition-all tw-duration-300">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            class="tw-w-full tw-bg-black tw-text-white tw-py-3 tw-rounded-md tw-font-medium tw-mt-6
-            tw-col-span-full sm:tw-col-span-1 tw-text-base">
-            <span>Add image</span>
-          </button>
+
+          <div class="tw-col-span-full sm:tw-col-span-1">
+            <p v-if="files?.length === 1" class="tw-text-xs tw-inline-flex tw-items-center">
+              Selected file: <strong>{{ files.item(0)!.name }}</strong>
+              <v-icon @click="resetFiles" size="28">mdi-minus-circle</v-icon>
+            </p>
+            <button
+              type="button"
+              @click="handleAddImaageBtnClick"
+              class="tw-w-full tw-bg-black tw-text-white tw-py-3 tw-mt-2 tw-rounded-md tw-font-medium tw-text-base"
+              :disabled="uploadingImage">
+              <template v-if="!uploadingImage">
+                <span>{{ files?.length === 1 ? 'Upload selected image' : 'Add image' }}</span>
+              </template>
+              <v-progress-circular
+                v-else
+                indeterminate
+                color="white"
+                size="20" width="2">
+              </v-progress-circular>
+            </button>
+          </div>
         </div>
       </form>
     </div>
+    <v-snackbar
+      v-model="snackbar.show">
+      {{ snackbar.text }}
+    </v-snackbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import { getDatabase, ref as RTDBRef, set } from "firebase/database";
+import { getDatabase, ref as RTDBRef, set, push } from "firebase/database";
 import states from '@/nigerian-states.json'
+
+import { useFileDialog } from '@vueuse/core'
+import { ref as storageRef } from 'firebase/storage'
+import { useFirebaseStorage, useStorageFile, useCurrentUser } from 'vuefire'
+import { Timestamp, collection, addDoc } from 'firebase/firestore'
 
 definePageMeta({
   middleware: ['auth', 'buyer'],
   requiresAuth: true,
 })
 
-const user = useCurrentUser()
-
-// function writeUserData(userId:string, name:string, email:string, imageUrl:string) {
-//   const db = getDatabase();
-//   set(ref(db, 'users/' + userId), {
-//     username: name,
-//     email: email,
-//     profile_picture : imageUrl
-//   });
-// }
-// onMounted(()=>writeUserData('1', 'name', 'email', 'imageUrl'))
-const form = ref({
-  name: '',
-  description: '',
-  images: [],
-  state: '',
-  lga: '',
-  market: '',
+const snackbar = ref({
+  show: false,
+  text: ''
 })
 
 const carousel = ref(0)
@@ -150,6 +176,17 @@ const spatularImages = [
   "https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/istockphoto-1270011649-612x612.jpg?alt=media&token=210f6704-b960-437a-b30b-3ea4c3a146ff",
   "https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/istockphoto-134724298-612x612.jpg?alt=media&token=adf99e2d-daef-41f9-af29-4fc4fbb72284"
 ]
+const renderedCarouselImages = computed(()=>form.value.images.length ? form.value.images : spatularImages)
+
+const user = useCurrentUser()
+const form = ref({
+  name: '',
+  description: '',
+  images: [] as string[],
+  state: '',
+  lga: '',
+  market: '',
+})
 
 const statesAndLga = states as {
   code: string
@@ -218,8 +255,83 @@ watch(()=>form.value.lga, (value)=>{
   form.value.market = ''
 })
 
+// IMAGE UPLOAD SECTION
+const { files, open, reset: resetFiles } = useFileDialog()
+const storage = useFirebaseStorage()
+// let mountainFileRef = storageRef(storage, `uploads/${(new Date).toJSON()}`)
+const mountainFileRef = computed(()=>{
+  const num = Number(form.value.images.length + 1)
+  return storageRef(storage, `uploads/${(new Date).toJSON()+num}`)
+})
+const {
+  url,
+  uploadProgress,
+  uploadError,
+  // firebase upload task
+  uploadTask,
+  upload,
+} = useStorageFile(mountainFileRef)
+const uploadingImage = ref(false)
+const readyForAnotherUpload = ref(true)
+const handleAddImaageBtnClick = async () => {
+  // if a file has been selected
+  if(files.value?.length === 1) {
+    // start upload
+    uploadingImage.value = true
+    readyForAnotherUpload.value = false
+    const data = files.value?.item(0)
+    if (data) {
+      await upload(data)
+      uploadingImage.value = false
+    }
+    return
+  }
+  open({ accept: 'image/*', multiple: false })
+}
+// watch till when upload is complete
+// then add image to image list(displayed)
+watch(()=>url.value, (value)=>{
+  if(!value) return
+  form.value.images.push(value)
+  setTimeout(()=>{
+    readyForAnotherUpload.value = true
+    resetFiles()
+  }, 1000)
+})
+
+
+// function writeUserData(userId:string, name:string, email:string, imageUrl:string) {
+//   const db = getDatabase();
+//   set(ref(db, 'users/' + userId), {
+//     username: name,
+//     email: email,
+//     profile_picture : imageUrl
+//   });
+// }
+// onMounted(()=>writeUserData('1', 'name', 'email', 'imageUrl'))
+
 const submiting = ref(false)
-const handleNewRequest = () => {
-  console.log({ form: form.value })
+const handleNewRequest = async () => {
+  // because image is required
+  if(!form.value.images.length) {
+    snackbar.value = {
+      show: true,
+      text: 'Please add at least one image of the item you want to buy'
+    }
+    return
+  }
+
+  submiting.value = true
+  const db = getDatabase();
+  const requestsRef = RTDBRef(db, 'requests')
+  const newRequest = {
+    ...form.value,
+    buyerId: user.value?.uid,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  }
+  push(requestsRef, newRequest).then(()=>{
+    submiting.value = false
+  })
 }
 </script>
