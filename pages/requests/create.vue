@@ -144,6 +144,22 @@
         </div>
       </form>
     </div>
+    <v-dialog v-model="successModal" max-width="300">
+      <div class="tw-bg-white tw-p-6 tw-text-black tw-flex tw-flex-col tw-items-center tw-rounded-2xl">
+        <div class="tw-text-center">
+          <h2 class="tw-text-5xl tw-font-bold">Success!!!</h2>
+          <p>Your request has been broadcasted</p>
+        </div>
+
+        <div class="tw-pb-6 tw-mt-10">
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/giphy.gif?alt=media&token=06ec1248-5943-4153-aa62-9e4e28d8c9f2"
+            class="tw-h-[200px] tw-w-[200px] tw-object-cover tw-object-left tw-rounded-2xl">
+        </div>
+        <p class="tw-text-center tw-font-medium">Redirecting you in 3 seconds...</p>
+      </div>
+    </v-dialog>
+
     <v-snackbar
       v-model="snackbar.show">
       {{ snackbar.text }}
@@ -187,6 +203,16 @@ const form = ref({
   lga: '',
   market: '',
 })
+const resetForm = ()=>{
+  form.value = {
+    name: '',
+    description: '',
+    images: [] as string[],
+    state: '',
+    lga: '',
+    market: '',
+  }
+}
 
 const statesAndLga = states as {
   code: string
@@ -299,17 +325,9 @@ watch(()=>url.value, (value)=>{
   }, 1000)
 })
 
-
-// function writeUserData(userId:string, name:string, email:string, imageUrl:string) {
-//   const db = getDatabase();
-//   set(ref(db, 'users/' + userId), {
-//     username: name,
-//     email: email,
-//     profile_picture : imageUrl
-//   });
-// }
-// onMounted(()=>writeUserData('1', 'name', 'email', 'imageUrl'))
-
+// SUBMIT REQUEST
+const router = useRouter()
+const successModal = ref(false)
 const submiting = ref(false)
 const handleNewRequest = async () => {
   // because image is required
@@ -332,6 +350,10 @@ const handleNewRequest = async () => {
   }
   push(requestsRef, newRequest).then(()=>{
     submiting.value = false
+    successModal.value = true
+    resetForm()
+    resetFiles()
+    setTimeout(()=>router.push('/accounts/'+user.value?.uid), 3000)
   })
 }
 </script>
