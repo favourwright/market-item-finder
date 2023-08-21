@@ -55,6 +55,9 @@
               :itemName="request.name"
               :thumbnail="request.images[0]"
               :created-at="request.createdAt"
+              :buyerId="request.buyerId"
+              :locked-seller-id="request.lockedSellerId ?? null"
+              :sellers-price-quote="request.sellersPriceQuote ?? null"
               :account-type="userCookie?.accountType"
             />
           </div>
@@ -67,6 +70,9 @@
               :itemName="request.name"
               :thumbnail="request.images[0]"
               :created-at="request.createdAt"
+              :buyerId="request.buyerId"
+              :locked-seller-id="request.lockedSellerId ?? null"
+              :sellers-price-quote="request.sellersPriceQuote ?? null"
               :account-type="userCookie?.accountType"
               :is-completed="true"
             />

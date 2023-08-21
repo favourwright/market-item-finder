@@ -17,8 +17,12 @@
             <div>
               <h3 class="tw-text-xl tw-truncate tw-font-semibold">{{ itemName }}</h3>
               <p class="tw-text-sm">ID: {{ requestId }}</p>
-              <!-- <p class="tw-text-sm">Buyer: John Doe</p> -->
-              <!-- <p class="tw-text-sm">Accepted Seller: John Doe</p> -->
+
+              <template v-if="lifecycle===RequestLifecycle.REQUEST_LOCKED || lifecycle===RequestLifecycle.COMPLETED">
+                <p class="tw-text-sm">Buyer: {{ buyer?.username }}</p>
+                <p class="tw-text-sm">Seller: {{ lockedSeller?.username }}</p>
+                <p class="tw-text-sm">Price: {{ sellersPriceQuote }}</p>
+              </template>
             </div>
           </div>
           <span class="tw-text-sm">{{ timeAgo }}</span>
@@ -77,7 +81,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AccountType, RequestLifecycle } from '@/types'
+import { AccountType, RequestLifecycle, User } from '@/types'
+import { collection, where, query, limit, getDocs } from 'firebase/firestore';
 import moment from 'moment'
 
 interface Props {
@@ -88,6 +93,9 @@ interface Props {
   thumbnail: string
   createdAt: Date
   accountType: AccountType
+  sellersPriceQuote: number | null
+  buyerId: string
+  lockedSellerId: string | null
 }
 
 const props = defineProps<Props>()
@@ -111,4 +119,30 @@ const lifecycleProgress = computed<number>(()=>{
 })
 
 const timeAgo = computed<string>(()=>moment(props.createdAt).fromNow())
+
+const db = useFirestore()
+const getUserDetails = async ({ uId }: { uId: string | null }) => {
+  return new Promise<User>(async (resolve, reject) => {
+    if (!uId) return resolve(null as unknown as User)
+    const q = query(collection(db, "users"), where("id", "==", uId), limit(1));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      const user = doc.data() as User
+      resolve(user)
+    })
+  })
+}
+const buyer = ref<User | null>(null)
+const lockedSeller = ref<User | null>(null)
+onMounted(()=>{
+  Promise.all([
+    getUserDetails({ uId: props.buyerId }),
+    getUserDetails({ uId: props.lockedSellerId || null }),
+  ]).then(([buyerDetails, lockedSellerDetails]) => {
+    buyer.value = buyerDetails
+    lockedSeller.value = lockedSellerDetails
+  }).catch((err) => {
+    console.log(err)
+  })
+})
 </script>

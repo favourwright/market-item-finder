@@ -37,7 +37,9 @@ export interface Request {
   id?: string
   name: string
   buyerId: string
+  sellersPriceQuote?: number,
   sellers?: string[]
+  lockedSellerId?: string
   description: string
   images: string[]
   createdAt: Date
