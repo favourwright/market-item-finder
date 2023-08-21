@@ -7,7 +7,7 @@
         v-model="isCompletedNow" class="tw-mb-6"
       />
 
-      <div v-if="isBuyer" class="tw-mb-6">
+      <div v-if="isBuyer" class="tw-mb-6 tw-flex tw-justify-end">
         <NuxtLink
           to="/requests/create"
           class="tw-inline-block tw-p-4 tw-px-6 tw-rounded-full tw-bg-black
