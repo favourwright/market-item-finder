@@ -7,8 +7,15 @@
         v-model="isCompletedNow" class="tw-mb-6"
       />
 
-      <div v-if="isBuyer" class="tw-mb-6 tw-flex tw-justify-end">
+      <div class="tw-mb-6 tw-flex tw-justify-between tw-items-center">
+        <div
+          class="tw-h-16 tw-w-16 tw-rounded-full tw-bg-gray-100 tw-text-4xl tw-font-black
+          tw-flex tw-items-center tw-justify-center tw-select-none">
+          {{ userInitial }}
+        </div>
+
         <NuxtLink
+          v-if="isBuyer"
           to="/requests/create"
           class="tw-inline-block tw-p-4 tw-px-6 tw-rounded-full tw-bg-black
           tw-select-none tw-text-white hover:tw-bg-black/80
@@ -29,27 +36,43 @@
               :class="[is_active ? 'tw-border-black' : 'tw-text-gray-400 tw-border-transparent']"
               class="tw-border-b-4 tw-py-2 tw-transition tw-duration-300 tw-font-medium tw-cursor-pointer">
               <span class="tw-flex tw-flex-col tw-items-center">
-                <v-icon>{{ tab.icon }}</v-icon>
-                <span>{{ tab.name }}</span>
+                <v-icon>{{ tab?.icon }}</v-icon>
+                <span>{{ tab?.name }}</span>
               </span>
             </div>
           </template>
         </Tabs>
 
         <div class="tw-mt-6">
+          <!-- <pre>
+            {{ userRequestList }}
+          </pre> -->
           <div v-show="tab==='active'" class="tw-grid tw-gap-3">
             <RequestItem
-              itemName="iPhone 12 Pro Max"
-              :lifecycle="RequestLifecycle.ACCEPTED_BY_BUYER" v-for="n in 3"
+              v-for="request in activeRequestList" :key="request.id"
+              :requestId="request.id!"
+              :lifecycle="request.lifecycle"
+              :itemName="request.name"
+              :thumbnail="request.images[0]"
             />
           </div>
           
           <div v-show="tab==='completed'" class="tw-grid tw-gap-3">
             <RequestItem
-              itemName="Plastic spatula"
-              :lifecycle="RequestLifecycle.COMPLETED"
-              :is-completed="true"
+              v-for="request in completedRequestList" :key="request.id"
+              :requestId="request.id!"
+              :lifecycle="request.lifecycle"
+              :itemName="request.name"
+              :thumbnail="request.images[0]"
             />
+          </div>
+
+          <!-- show empty state UI when either tab has no content -->
+          <div
+            v-show="(tab===tab_list[0].slug && activeRequestList.length===0) || (tab===tab_list[1].slug && completedRequestList.length===0)"
+            class="tw-p-6 tw-py-10 tw-text-center tw-border-4 tw-border-gray-400/5 tw-rounded-2xl
+            tw-bg-gray-300/5 tw-my-10 tw-text-2xl tw-text-gray-500">
+            <p>All {{ tab }} requests will be listed here...</p>
           </div>
         </div>
       </div>
@@ -63,7 +86,8 @@ import Tabs from '@/components/Tabs.vue';
 import RequestItem from '@/components/RequestItem.vue';
 import { useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
-import { RequestLifecycle, AccountType, User } from '@/types'
+import { RequestLifecycle, AccountType, User, Request } from '@/types'
+import { getDatabase, ref as RTDBRef, equalTo, orderByChild, query, onValue } from "firebase/database";
 
 useHead({
   title: 'iMarket Finder - Your account',
@@ -80,14 +104,60 @@ const isCompletedNow = ref(false)
 const isCompleted = computed(()=>!!userCookie.value?.username)
 
 const tab = ref()
-const tab_list = ref<{ name: string, slug: string, icon: string }[]>([
-  { name: 'Accepted requests', slug: 'active', icon: 'mdi-timelapse' }, // seller
-  // { name: 'Active requests', slug: 'active', icon: 'mdi-timelapse' },
-  { name: 'Requests I fulfilled', slug: 'completed', icon: 'mdi-cube-send' }, // seller
-  // { name: 'Completed requests', slug: 'completed', icon: 'mdi-cube-send' },
-])
+const tab_list = ref<{ name: string, slug: string, icon: string }[]>([])
+onBeforeMount(()=>{
+  if (isSeller.value) {
+    tab_list.value = [
+      { name: 'Accepted requests', slug: 'accepted', icon: 'mdi-timelapse' },
+      { name: 'Requests I fulfilled', slug: 'fulfilled', icon: 'mdi-cube-send' },
+    ]
+    return
+  }
 
+  tab_list.value = [
+    { name: 'Active requests', slug: 'active', icon: 'mdi-timelapse' },
+    { name: 'Completed requests', slug: 'completed', icon: 'mdi-cube-send' },
+  ]
+})
+
+const user = useCurrentUser()
 const userCookie = useCookie<User>('user')
+const userInitial = computed(() => userCookie.value?.username?.charAt(0).toUpperCase() ?? '?')
 const isSeller = computed(() => userCookie.value?.accountType === AccountType.SELLER)
 const isBuyer = computed(() => userCookie.value?.accountType === AccountType.BUYER) 
+
+const userRequestList = ref<Request[]>([])
+// fetching from firebase RTDB
+const fetchUserRequests = async () => {
+  const db = getDatabase();
+  const myRequestsRef = query(RTDBRef(db, 'requests/'), orderByChild('buyerId'), equalTo(user.value?.uid!))
+  onValue(myRequestsRef, (snapshot) => {
+    const newRequestList: Request[] = []
+    snapshot.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData = childSnapshot.val();
+      newRequestList.push({
+        id: childKey,
+        ...childData,
+      } as Request)
+    });
+    userRequestList.value = newRequestList
+  });
+}
+onMounted(fetchUserRequests)
+
+const activeRequestList = computed(() => {
+  if (isSeller.value) {
+    return []
+  }
+
+  return userRequestList.value.filter(request => request.lifecycle !== RequestLifecycle.COMPLETED)
+})
+const completedRequestList = computed(() => {
+  if (isSeller.value) {
+    return []
+  }
+
+  return userRequestList.value.filter(request => request.lifecycle === RequestLifecycle.COMPLETED)
+})
 </script>

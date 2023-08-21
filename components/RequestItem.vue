@@ -1,21 +1,23 @@
 <template>
   <div
-    :class="{ 'tw-text-gray-400 !tw-border-black/10': completed }"
-    class="tw-border-2 tw-border-black/20">
+    :class="{ 'tw-text-gray-400 !tw-border-black/5': completed }"
+    class="tw-border-2 tw-border-black/10">
     <div class="tw-p-2">
       <div class="sm:tw-flex">
         <div class="tw-flex-grow tw-flex tw-gap-2">
           <div
             :class="{ 'tw-opacity-40 tw-saturate-0': completed }"
-            class="tw-h-full tw-aspect-square tw-bg-black tw-rounded-lg tw-relative tw-overflow-hidden">
-            <!-- <img
-              src="https://firebasestorage.googleapis.com/v0/b/market-item-finder.appspot.com/o/05-iphone-12-pro-2020.webp?alt=media&token=3fb6bc22-728e-4c27-afce-7531e2c16a20"
-              class="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover"> -->
+            class="tw-h-full tw-aspect-square tw-bg-black tw-rounded-lg tw-relative tw-overflow-hidden
+            tw-ring-1 tw-ring-black">
+            <img
+              :src="thumbnail"
+              class="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-cover">
           </div>
           <div>
             <h3 class="tw-text-xl tw-truncate tw-font-semibold">{{ itemName }}</h3>
-            <p class="tw-text-sm">ID: 123456789</p>
-            <p class="tw-text-sm">Buyer: John Doe</p>
+            <p class="tw-text-sm">ID: {{ requestId }}</p>
+            <!-- <p class="tw-text-sm">Buyer: John Doe</p> -->
+            <!-- <p class="tw-text-sm">Accepted Seller: John Doe</p> -->
           </div>
         </div>
         <span class="tw-text-sm">20mins ago</span>
@@ -56,9 +58,11 @@ import { computed } from 'vue'
 import { RequestLifecycle } from '@/types'
 
 interface Props {
+  requestId: string
   isCompleted?: boolean
   lifecycle: RequestLifecycle
   itemName: string
+  thumbnail: string
 }
 
 const props = defineProps<Props>()

@@ -145,7 +145,7 @@
       </form>
     </div>
     <v-dialog v-model="successModal" max-width="300">
-      <div class="tw-bg-white tw-p-6 tw-text-black tw-flex tw-flex-col tw-items-center tw-rounded-2xl">
+      <div class="tw-bg-white tw-p-6 tw-text-black tw-flex tw-flex-col tw-items-center">
         <div class="tw-text-center">
           <h2 class="tw-text-5xl tw-font-bold">Success!!!</h2>
           <p>Your request has been broadcasted</p>
@@ -154,7 +154,7 @@
         <div class="tw-pb-6 tw-mt-10">
           <img
             src="https://firebasestorage.googleapis.com/v0/b/i-get-am.appspot.com/o/giphy.gif?alt=media&token=06ec1248-5943-4153-aa62-9e4e28d8c9f2"
-            class="tw-h-[200px] tw-w-[200px] tw-object-cover tw-object-left tw-rounded-2xl">
+            class="tw-h-[200px] tw-w-[200px] tw-object-cover tw-object-left tw-rounded-xl">
         </div>
         <p class="tw-text-center tw-font-medium">Redirecting you in 3 seconds...</p>
       </div>
@@ -170,6 +170,7 @@
 <script setup lang="ts">
 import { getDatabase, ref as RTDBRef, set, push } from "firebase/database";
 import states from '@/nigerian-states.json'
+import { RequestLifecycle } from '@/types'
 
 import { useFileDialog } from '@vueuse/core'
 import { ref as storageRef } from 'firebase/storage'
@@ -230,6 +231,7 @@ const activeLgas = computed(()=>{
   const state = statesAndLga.find(state=>state.name === form.value.state)
   return state?.lgas || []
 })
+// fetch this from firebase later
 const recordedMarkets = {
   "aba": [
     "aba main market",
@@ -345,6 +347,7 @@ const handleNewRequest = async () => {
   const newRequest = {
     ...form.value,
     buyerId: user.value?.uid,
+    lifecycle: RequestLifecycle.PENDING,
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   }

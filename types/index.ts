@@ -32,3 +32,18 @@ export enum RequestLifecycle {
   REQUEST_LOCKED = 'request_locked',
   COMPLETED = 'completed',
 }
+
+export interface Request {
+  id?: string
+  name: string
+  buyerId: string
+  sellers?: string[]
+  description: string
+  images: string[]
+  createdAt: Date
+  lifecycle: RequestLifecycle
+  market: string
+  lga: string
+  state: string
+  updatedAt: Date
+}
