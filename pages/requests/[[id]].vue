@@ -20,15 +20,65 @@
         </ClientOnly>
       </v-col>
     </div>
-    <div v-if="!!requestDetails?.id">
-      {{ requestDetails }}
+    <div v-if="!!requestDetails?.id" class="tw-max-w-7xl tw-mx-auto tw-p-6 sm:tw-p-10">
+      <Tabs
+        :tab_list="tab_list"
+        :value="tab"
+        @model-value="($event) => tab = $event"
+        class="tw-inline-flex tw-gap-x-1 sm:tw-gap-x-2 tw-justify-between
+        tw-rounded-sm tw-w-full [&>*]:tw-flex-grow [&>*]:tw-max-w-[50%] sm:tw-hidden">
+        <template v-slot:tab="{ tab, index: i, is_active }">
+          <div
+            :class="[is_active ? 'tw-border-black' : 'tw-text-gray-400 tw-border-transparent']"
+            class="tw-border-b-4 tw-py-2 tw-transition tw-duration-300 tw-font-medium tw-cursor-pointer">
+            <span class="tw-flex tw-flex-col tw-items-center">
+              <span>{{ tab?.name }}</span>
+            </span>
+          </div>
+        </template>
+      </Tabs>
+
+      <div>
+        <div class="tw-grid sm:tw-grid-cols-3 tw-gap-10 tw-pt-4 sm:tw-pt-0">
+          <div
+            :class="{ 'tw-hidden sm:tw-block': tab !== tab_list[0].slug }"
+            class="sm:tw-col-span-2 tw-space-y-14">
+            <div>
+              <h2 class="tw-text-5xl tw-font-bold tw-bg-black tw-text-white">
+                {{ requestDetails.name }}
+              </h2>
+              <p>{{ timeAgo }}</p>
+            </div>
+
+            <div class="">
+              <h3 class="tw-text-5xl tw-font-bold">Description</h3>
+              <p class="tw-mt-2 tw-text-2xl">{{ requestDetails.description }}</p>
+            </div>
+
+            <div class="">
+              <h3 class="tw-text-5xl tw-font-bold">Target Market</h3>
+              <p class="tw-mt-2 tw-text-2xl tw-capitalize">
+                {{ !!requestDetails?.market ? `${requestDetails?.market}, ` : '' }}
+                {{ `${requestDetails?.lga}, ${requestDetails?.state}` }}
+              </p>
+            </div>
+          </div>
+          
+          <div
+            :class="{ 'tw-hidden sm:tw-block': tab !== tab_list[1].slug }"
+            class="sm:tw-col-span-1">
+            sellers
+          </div>
+        </div>
+      </div>
+
     </div>
     <div v-else class="tw-text-center tw-py-20">
       <p class="tw-text-4xl tw-text-black">loading...</p>
     </div>
 
     <v-dialog v-model="imagePreview" max-width="500">
-      <div class="tw-bg-white tw-rounded-xl">
+      <div>
         <img
           :src="previewedImage"
           class="tw-h-full tw-w-full tw-object-contain">
@@ -39,7 +89,8 @@
 
 <script setup lang="ts">
 import { getDatabase, onValue, ref as RTDBRef } from 'firebase/database';
-import { Request } from '@/types';
+import { AccountType, Request, User } from '@/types';
+import moment from 'moment'
 
 definePageMeta({
   middleware: 'auth',
@@ -66,6 +117,11 @@ const fetchUserRequests = async () => {
   });
 }
 onMounted(fetchUserRequests)
+const timeAgo = computed<string>(()=>{
+  if(!requestDetails.value) return ''
+  return moment(new Date(requestDetails.value.createdAt.seconds*1000)).fromNow()
+})
+
 
 const imagePreview = ref(false)
 const previewedImage = ref('')
@@ -73,4 +129,26 @@ const previewImage = (src: string) => {
   imagePreview.value = true
   previewedImage.value = src
 }
+
+const user = useCurrentUser()
+const userCookie = useCookie<User>('user')
+const isSeller = computed(() => userCookie.value?.accountType === AccountType.SELLER)
+const isBuyer = computed(() => userCookie.value?.accountType === AccountType.BUYER) 
+
+const tab = ref()
+const tab_list = ref<{ name: string, slug: string }[]>([])
+onBeforeMount(()=>{
+  if (isSeller.value) {
+    tab_list.value = [
+      { name: 'Details', slug: 'details' },
+      { name: 'My offer', slug: 'seller' },
+    ]
+    return
+  }
+
+  tab_list.value = [
+    { name: 'Details', slug: 'details' },
+    { name: 'Sellers offers', slug: 'seller' },
+  ]
+})
 </script>
