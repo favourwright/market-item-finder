@@ -20,7 +20,7 @@
             <!-- <p class="tw-text-sm">Accepted Seller: John Doe</p> -->
           </div>
         </div>
-        <span class="tw-text-sm">20mins ago</span>
+        <span class="tw-text-sm">{{ timeAgo }}</span>
       </div>
     </div>
 
@@ -33,20 +33,35 @@
       <div
         :class="{ '!tw-text-gray-400': completed }"
         class="tw-text-white tw-relative tw-text-sm tw-grid tw-grid-cols-3 tw-py-1">
+        
         <div class="tw-flex tw-justify-center tw-items-center tw-gap-1">
-          <!-- <v-icon>mdi-timelapse</v-icon> -->
-          <v-icon>mdi-checkbox-marked-circle</v-icon>
-          <span>seller</span>
+          <template v-if="accountType === AccountType.BUYER">
+            <v-icon>
+              {{
+                (lifecycle!==RequestLifecycle.PENDING) ?
+                  'mdi-checkbox-marked-circle' : 'mdi-timelapse'
+              }}
+              </v-icon>
+            <span>seller</span>
+          </template>
+          <template v-else>
+            <v-icon>mdi-checkbox-marked-circle</v-icon>
+            <span>accepted</span>
+          </template>
         </div>
         <div class="tw-flex tw-justify-center tw-items-center tw-gap-1">
-          <!-- <v-icon>mdi-timelapse</v-icon> -->
-          <v-icon>mdi-checkbox-marked-circle</v-icon>
-          <span>buyer</span>
+          <template v-if="accountType === AccountType.SELLER">
+            <v-icon>{{ lifecycle===RequestLifecycle.ACCEPTED_BY_BUYER ? 'mdi-checkbox-marked-circle' : 'mdi-timelapse' }}</v-icon>
+            <span>buyer</span>
+          </template>
+          <template v-else>
+            <v-icon>mdi-checkbox-marked-circle</v-icon>
+            <span>accepted</span>
+          </template>
         </div>
         <div class="tw-flex tw-justify-center tw-items-center tw-gap-1">
-          <!-- <v-icon>mdi-timelapse</v-icon> -->
-          <v-icon>mdi-lock</v-icon>
-          <span>locks in 15mins</span>
+          <v-icon>{{ lifecycle===RequestLifecycle.REQUEST_LOCKED ? 'mdi-lock' : 'mdi-timelapse' }}</v-icon>
+          <span>{{ lifecycle===RequestLifecycle.REQUEST_LOCKED ? 'locked' : 'locks in 15mins' }}</span>
         </div>
       </div>
     </div>
@@ -55,7 +70,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RequestLifecycle } from '@/types'
+import { AccountType, RequestLifecycle } from '@/types'
+import moment from 'moment'
 
 interface Props {
   requestId: string
@@ -63,6 +79,8 @@ interface Props {
   lifecycle: RequestLifecycle
   itemName: string
   thumbnail: string
+  createdAt: Date
+  accountType: AccountType
 }
 
 const props = defineProps<Props>()
@@ -84,4 +102,6 @@ const lifecycleProgress = computed<number>(()=>{
       return 0
   }
 })
+
+const timeAgo = computed<string>(()=>moment(props.createdAt).fromNow())
 </script>

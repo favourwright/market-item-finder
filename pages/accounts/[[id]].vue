@@ -54,6 +54,8 @@
               :lifecycle="request.lifecycle"
               :itemName="request.name"
               :thumbnail="request.images[0]"
+              :created-at="request.createdAt"
+              :account-type="userCookie?.accountType"
             />
           </div>
           
@@ -64,6 +66,9 @@
               :lifecycle="request.lifecycle"
               :itemName="request.name"
               :thumbnail="request.images[0]"
+              :created-at="request.createdAt"
+              :account-type="userCookie?.accountType"
+              :is-completed="true"
             />
           </div>
 
@@ -88,6 +93,7 @@ import { useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
 import { RequestLifecycle, AccountType, User, Request } from '@/types'
 import { getDatabase, ref as RTDBRef, equalTo, orderByChild, query, onValue } from "firebase/database";
+import { Timestamp } from 'firebase/firestore';
 
 useHead({
   title: 'iMarket Finder - Your account',
@@ -139,6 +145,7 @@ const fetchUserRequests = async () => {
       newRequestList.push({
         id: childKey,
         ...childData,
+        createdAt: new Date(childData.createdAt.seconds*1000),
       } as Request)
     });
     userRequestList.value = newRequestList
@@ -151,13 +158,13 @@ const activeRequestList = computed(() => {
     return []
   }
 
-  return userRequestList.value.filter(request => request.lifecycle !== RequestLifecycle.COMPLETED)
+  return userRequestList.value.filter(request => request.lifecycle !== RequestLifecycle.COMPLETED).reverse()
 })
 const completedRequestList = computed(() => {
   if (isSeller.value) {
     return []
   }
 
-  return userRequestList.value.filter(request => request.lifecycle === RequestLifecycle.COMPLETED)
+  return userRequestList.value.filter(request => request.lifecycle === RequestLifecycle.COMPLETED).reverse()
 })
 </script>
