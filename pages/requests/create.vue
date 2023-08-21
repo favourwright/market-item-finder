@@ -351,12 +351,12 @@ const handleNewRequest = async () => {
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   }
-  push(requestsRef, newRequest).then(()=>{
+  push(requestsRef, newRequest).then((res)=>{
     submiting.value = false
     successModal.value = true
     resetForm()
     resetFiles()
-    setTimeout(()=>router.push('/accounts/'+user.value?.uid), 3000)
+    setTimeout(()=>router.push('/requests/'+res.key), 3000)
   })
 }
 </script>
