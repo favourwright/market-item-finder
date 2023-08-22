@@ -67,7 +67,37 @@
           <div
             :class="{ 'tw-hidden sm:tw-block': tab !== tab_list[1].slug }"
             class="sm:tw-col-span-1">
-            sellers
+            <template v-if="isBuyer" >
+              <div v-if="renderedOffers.length" class="tw-space-y-4">
+                <SellerOffer
+                  v-for="(offer,n) in renderedOffers"
+                  :key="n"
+                  :offer-id="offer.id!"
+                  :request-id="requestDetails.id"
+                  :store-name="offer.storeName"
+                  :buyer-id="requestDetails.buyerId"
+                  :seller-id="offer.sellerId"
+                  :images="offer.images"
+                  :lifecycle="requestDetails.lifecycle"
+                  :price-quote="offer.price"
+                />
+              </div>
+              <div v-else
+                class="tw-p-6 tw-py-10 tw-text-center tw-border-4 tw-border-gray-400/5 tw-rounded-2xl
+                tw-bg-gray-300/5 tw-text-2xl tw-text-gray-500">
+                <p>No offers yet</p>
+              </div>
+            </template>
+
+            <template v-else>
+              <SellerQuoteRequestor
+                :request-id="requestDetails.id"
+                :seller-ids="requestDetails?.sellerIds || []"
+                :images="sellerExistingOffer?.images || []"
+                :quote-price="sellerExistingOffer?.price || 0"
+                :offer-id="sellerExistingOffer?.id || null"
+              />
+            </template>
           </div>
         </div>
       </div>
@@ -88,8 +118,10 @@
 </template>
 
 <script setup lang="ts">
-import { getDatabase, onValue, ref as RTDBRef } from 'firebase/database';
-import { AccountType, Request, User } from '@/types';
+import SellerOffer from '@/components/SellerOffer.vue';
+import SellerQuoteRequestor from '@/components/SellerQuoteRequestor.vue';
+import { getDatabase, onValue, ref as RTDBRef, query, orderByChild, equalTo } from 'firebase/database';
+import { AccountType, Offer, Request, RequestLifecycle, User } from '@/types';
 import moment from 'moment'
 
 definePageMeta({
@@ -155,7 +187,49 @@ onBeforeMount(()=>{
 
   tab_list.value = [
     { name: 'Details', slug: 'details' },
-    { name: 'Sellers offers', slug: 'seller' },
+    { name: 'Sellers offer', slug: 'seller' },
   ]
 })
+
+const allOffers = ref<Offer[]>([])
+const fetchAllOffers = () => {
+  const db = getDatabase();
+  const offersRef = query(RTDBRef(db, 'offers/'), orderByChild('requestId'), equalTo(route.params.id as string))
+  onValue(offersRef, (snapshot) => {
+    const offerList: Offer[] = []
+    snapshot.forEach((childSnapshot) => {
+      const childKey = childSnapshot.key;
+      const childData = childSnapshot.val();
+      offerList.push({
+        id: childKey,
+        ...childData,
+        // createdAt: new Date(childData.createdAt.seconds*1000),
+      } as Offer)
+    });
+    allOffers.value = offerList
+  });
+}
+onMounted(()=>fetchAllOffers())
+
+const renderedOffers = computed(()=>{
+  return (
+    requestDetails.value?.lifecycle === RequestLifecycle.ACCEPTED_BY_BUYER ||
+    requestDetails.value?.lifecycle === RequestLifecycle.REQUEST_LOCKED ||
+    requestDetails.value?.lifecycle === RequestLifecycle.COMPLETED
+  )
+    ? allOffers.value.filter(offer => offer.isAccepted)
+    : allOffers.value
+})
+
+const sellerExistingOffer = computed(()=>{
+  if(!allOffers.value.length) return null as unknown as Offer
+  let res: Offer = null as unknown as Offer
+  allOffers.value.forEach((offer)=>{
+    if(offer.sellerId === userCookie.value?.id){
+      res = offer
+    }
+  })
+  return res
+})
+
 </script>

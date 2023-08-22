@@ -30,7 +30,7 @@
               <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Describe this items</span>
               <textarea
                 v-model="form.description"
-                placeholder="Any spatular made of plastic is fine but it must be pink"
+                placeholder="Any spatular made of plastic is fine but it must be black"
                 :required="true"
                 class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black
                 tw-min-h-[120px] tw-max-h-[120px]">

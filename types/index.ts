@@ -38,7 +38,7 @@ export interface Request {
   name: string
   buyerId: string
   sellersPriceQuote?: number,
-  sellers?: string[]
+  sellerIds?: string[]
   lockedSellerId?: string
   description: string
   images: string[]
@@ -47,5 +47,17 @@ export interface Request {
   market: string
   lga: string
   state: string
+  updatedAt: Date
+}
+
+export interface Offer {
+  id?: string
+  price: number
+  images: string[]
+  requestId: string
+  storeName: string
+  sellerId: string
+  isAccepted: boolean
+  createdAt: Date
   updatedAt: Date
 }

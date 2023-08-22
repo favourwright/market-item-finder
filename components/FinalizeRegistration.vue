@@ -307,7 +307,8 @@ const handleFinalSignup = async () => {
     ...temp,
     username: payload.username,
     phone: payload.phone,
-  })}; path=/;`
+    stores: payload?.stores || null,
+  })}; path=/; expires=Fri, 31 Dec 9999 23:59:59 GMT;`
 
   emit('update:modelValue', true)
   submiting.value = false
