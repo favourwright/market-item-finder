@@ -27,7 +27,7 @@
                   <v-icon
                     @click="()=>showPassword=!showPassword"
                     :class="[showPassword ? '!tw-text-black' : '!tw-text-gray-300']"
-                    class="!tw-absolute !tw-right-0 !tw-mx-3 tw-bg-gray-100">
+                    class="!tw-absolute !tw-right-0 !tw-mx-3 tw-bg-gray-100 !tw-rounded-2xl">
                     {{ showPassword ? 'mdi-eye-outline' : 'mdi-eye-off-outline' }}
                   </v-icon>
               </label>
