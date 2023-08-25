@@ -16,14 +16,20 @@
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
               </label>
 
-              <label class="tw-relative tw-mt-4 tw-block">
-                <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Enter your password</span>
+              <label class="tw-relative tw-mt-4 tw-flex tw-items-center">
+                <span class="tw-absolute tw-top-0 tw-text-base tw-pl-4 tw-pt-1">Enter your password</span>
                 <input
                   v-model="form.password"
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   placeholder="******"
                   :required="true"
                   class="tw-w-full tw-bg-gray-100 tw-p-4 tw-pt-7 tw-rounded-md tw-outline-black">
+                  <v-icon
+                    @click="()=>showPassword=!showPassword"
+                    :class="[showPassword ? '!tw-text-black' : '!tw-text-gray-300']"
+                    class="!tw-absolute !tw-right-0 !tw-mx-3 tw-bg-gray-100">
+                    {{ showPassword ? 'mdi-eye-outline' : 'mdi-eye-off-outline' }}
+                  </v-icon>
               </label>
 
               <button
@@ -75,6 +81,7 @@ const form = ref({
   email: '',
   password: '',
 })
+const showPassword = ref(false)
 
 const snackbar = ref({
   show: false,
