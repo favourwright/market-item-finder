@@ -44,10 +44,7 @@
         </Tabs>
 
         <div class="tw-mt-6">
-          <!-- <pre>
-            {{ userRequestList }}
-          </pre> -->
-          <div v-show="tab==='active'" class="tw-grid tw-gap-3">
+          <div v-show="tab===tab_list[0].slug" class="tw-grid tw-gap-3">
             <RequestItem
               v-for="request in activeRequestList" :key="request.id"
               :requestId="request.id!"
@@ -62,7 +59,7 @@
             />
           </div>
           
-          <div v-show="tab==='completed'" class="tw-grid tw-gap-3">
+          <div v-show="tab===tab_list[1].slug" class="tw-grid tw-gap-3">
             <RequestItem
               v-for="request in completedRequestList" :key="request.id"
               :requestId="request.id!"
@@ -97,9 +94,8 @@ import Tabs from '@/components/Tabs.vue';
 import RequestItem from '@/components/RequestItem.vue';
 import { useRoute } from 'vue-router'
 import { ref, computed } from 'vue'
-import { RequestLifecycle, AccountType, User, Request } from '@/types'
+import { RequestLifecycle, AccountType, User, Request, Offer } from '@/types'
 import { getDatabase, ref as RTDBRef, equalTo, orderByChild, query, onValue } from "firebase/database";
-import { Timestamp } from 'firebase/firestore';
 
 useHead({
   title: 'iMarket Finder - Your account',
@@ -151,26 +147,65 @@ const fetchUserRequests = async () => {
       newRequestList.push({
         id: childKey,
         ...childData,
-        createdAt: new Date(childData.createdAt.seconds*1000),
       } as Request)
     });
     userRequestList.value = newRequestList
   });
 }
-onMounted(fetchUserRequests)
+
+
+const requestIdsWithAcceptedOffersFromSeller = ref<string[]>([])
+const fetchSellersAcceptedOfferIds = async () => {
+  const db = getDatabase();
+
+  const sellerOfferRef = query(RTDBRef(db, 'offers/'), orderByChild('sellerId'), equalTo(user.value?.uid!))
+  onValue(sellerOfferRef, (snapshot) => {
+    const list:string[] = []
+    snapshot.forEach((childSnapshot) => {
+      const childData = childSnapshot.val();
+      list.push(childData.requestId)
+    })
+    requestIdsWithAcceptedOffersFromSeller.value = list
+  })
+}
+const sellerRequestList = ref<Request[]>([])
+watch(()=>requestIdsWithAcceptedOffersFromSeller.value, (value)=>{
+  sellerRequestList.value = []
+  const db = getDatabase();
+  value.map((requestId)=>{
+    const acceptedRequestsRef = RTDBRef(db, 'requests/'+ requestId)
+    onValue(acceptedRequestsRef, (snapshot) => {
+      const data = {
+        ...snapshot.val(),
+        id: snapshot.key
+      }
+      // if sellers offer was not the one accepted, then don't show it
+      if(data.lifecycle !== RequestLifecycle.ACCEPTED_BY_SELLER && data.lockedSellerId !== user.value?.uid!) return
+      sellerRequestList.value.push(data)
+    // using once here because of a duplication bug when updates trigger this function
+    }, { onlyOnce: true });
+  })
+})
+
+onMounted(()=>{
+  if (isSeller.value) {
+    fetchSellersAcceptedOfferIds()
+    return
+  }
+
+  fetchUserRequests()
+})
 
 const activeRequestList = computed(() => {
   if (isSeller.value) {
-    return []
+    return sellerRequestList.value.filter(request => request.lifecycle !== RequestLifecycle.COMPLETED).reverse()
   }
-
   return userRequestList.value.filter(request => request.lifecycle !== RequestLifecycle.COMPLETED).reverse()
 })
 const completedRequestList = computed(() => {
   if (isSeller.value) {
-    return []
+    return sellerRequestList.value.filter(request => request.lifecycle === RequestLifecycle.COMPLETED).reverse()
   }
-
   return userRequestList.value.filter(request => request.lifecycle === RequestLifecycle.COMPLETED).reverse()
 })
 </script>
