@@ -27,7 +27,7 @@
             </label>
 
             <label class="tw-relative tw-block tw-mt-6">
-              <span class="tw-absolute tw-text-base tw-pl-4 tw-pt-1">Describe this items</span>
+              <span class="tw-absolute tw-top-px tw-left-1 tw-text-base tw-pl-3 tw-pt-[3px] tw-bg-gray-100">Describe this items</span>
               <textarea
                 v-model="form.description"
                 placeholder="Any spatular made of plastic is fine but it must be black"
