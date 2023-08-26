@@ -93,6 +93,7 @@
               <SellerQuoteRequestor
                 :request-id="requestDetails.id"
                 :seller-ids="requestDetails?.sellerIds || []"
+                :locked-seller-id="requestDetails?.lockedSellerId || null"
                 :images="sellerExistingOffer?.images || []"
                 :quote-price="sellerExistingOffer?.price || 0"
                 :offer-id="sellerExistingOffer?.id || null"

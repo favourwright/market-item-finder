@@ -105,6 +105,7 @@ interface Props {
   images: string[] | null // used to pass default images for after offer is submitted
   quotePrice: number | null // used to pass default price for after offer is submitted
   offerId: string | null // used to update offer
+  lockedSellerId: string | null // used to check if seller is locked
 }
 const props = defineProps<Props>()
 const carousel = ref(0)
@@ -186,15 +187,16 @@ const handleFormSubmit = async () => {
   // if offerId is provided, then update offer
   const offerId = newPostKey || props.offerId
   // this part is for updating offer
-  // TODO: check if its same seller that was accepted for the request before doing this
-  updates[`/requests/${props.requestId}/lifecycle`] = RequestLifecycle.ACCEPTED_BY_SELLER;
   updates[`/offers/${offerId}/price`] = form.value.price;
   updates[`/offers/${offerId}/isAccepted`] = false;
   updates[`/offers/${offerId}/${hasSubmittedOffer.value ? 'updatedAt' : 'createdAt'}`] = serverTimestamp();
+  // if seller changes terms of offer, then these should be reset
+  // then the buyer can choose another seller or accept the offer again
+  if(props.lockedSellerId === user.value?.uid) {
+    updates[`/requests/${props.requestId}/lifecycle`] = RequestLifecycle.ACCEPTED_BY_SELLER;
+    updates[`/requests/${props.requestId}/lockedSellerId`] = null;
+  }
   if(!hasSubmittedOffer.value) {
-    console.log({
-      sellerIds : Array.from(new Set([...props.sellerIds, user.value?.uid])),
-    })
     updates[`/requests/${props.requestId}/sellerIds`] = Array.from(new Set([...props.sellerIds, user.value?.uid]));
     updates[`/offers/${offerId}/images`] = images.value;
     updates[`/offers/${offerId}/sellerId`] = user.value?.uid;
@@ -205,7 +207,7 @@ const handleFormSubmit = async () => {
   submiting.value = false
   snackbar.value = {
     show: true,
-    text: `You have successfully ${ hasSubmittedOffer ? 'updated your' : 'made an' } offer!`
+    text: `You have successfully ${ hasSubmittedOffer.value ? 'updated your' : 'made an' } offer!`
   }
 }
 
