@@ -158,7 +158,7 @@ const fetchUserRequests = async () => {
 onMounted(fetchUserRequests)
 const timeAgo = computed<string>(()=>{
   if(!requestDetails.value) return ''
-  return moment(new Date(requestDetails.value.createdAt?.seconds*1000)).fromNow()
+  return moment(new Date(requestDetails.value.createdAt)).fromNow()
 })
 
 

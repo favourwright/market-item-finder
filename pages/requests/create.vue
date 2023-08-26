@@ -168,14 +168,13 @@
 </template>
 
 <script setup lang="ts">
-import { getDatabase, ref as RTDBRef, set, push } from "firebase/database";
+import { getDatabase, ref as RTDBRef, set, push, serverTimestamp } from "firebase/database";
 import states from '@/nigerian-states.json'
 import { RequestLifecycle } from '@/types'
 
 import { useFileDialog } from '@vueuse/core'
 import { ref as storageRef } from 'firebase/storage'
 import { useFirebaseStorage, useStorageFile, useCurrentUser } from 'vuefire'
-import { Timestamp, collection, addDoc } from 'firebase/firestore'
 
 definePageMeta({
   middleware: ['auth', 'buyer'],
@@ -348,8 +347,8 @@ const handleNewRequest = async () => {
     ...form.value,
     buyerId: user.value?.uid,
     lifecycle: RequestLifecycle.PENDING,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   }
   push(requestsRef, newRequest).then((res)=>{
     submiting.value = false
