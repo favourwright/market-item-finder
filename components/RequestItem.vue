@@ -45,7 +45,7 @@
               <v-icon>
                 {{
                   (lifecycle!==RequestLifecycle.PENDING) ?
-                    'mdi-checkbox-marked-circle' : 'mdi-timelapse'
+                  'mdi-checkbox-marked-circle' : 'mdi-timelapse'
                 }}
                 </v-icon>
               <span>seller</span>
@@ -57,7 +57,14 @@
           </div>
           <div class="tw-flex tw-justify-center tw-items-center tw-gap-1">
             <template v-if="accountType === AccountType.SELLER">
-              <v-icon>{{ lifecycle===RequestLifecycle.ACCEPTED_BY_BUYER ? 'mdi-checkbox-marked-circle' : 'mdi-timelapse' }}</v-icon>
+              <v-icon>
+                {{
+                  lifecycle===RequestLifecycle.ACCEPTED_BY_BUYER ||
+                  lifecycle===RequestLifecycle.REQUEST_LOCKED ||
+                  lifecycle===RequestLifecycle.COMPLETED ?
+                  'mdi-checkbox-marked-circle' : 'mdi-timelapse'
+                }}
+              </v-icon>
               <span>buyer</span>
             </template>
             <template v-else>
@@ -66,8 +73,20 @@
             </template>
           </div>
           <div class="tw-flex tw-justify-center tw-items-center tw-gap-1">
-            <v-icon>{{ lifecycle===RequestLifecycle.REQUEST_LOCKED ? 'mdi-lock' : 'mdi-timelapse' }}</v-icon>
-            <span>{{ lifecycle===RequestLifecycle.REQUEST_LOCKED ? 'locked' : 'locks in 15mins' }}</span>
+            <v-icon>
+              {{
+                lifecycle===RequestLifecycle.REQUEST_LOCKED ||
+                lifecycle===RequestLifecycle.COMPLETED ?
+                'mdi-lock' : 'mdi-timelapse'
+              }}
+            </v-icon>
+            <span>
+              {{
+                lifecycle===RequestLifecycle.REQUEST_LOCKED ||
+                lifecycle===RequestLifecycle.COMPLETED ?
+                'locked' : 'locks in 15mins'
+              }}
+            </span>
           </div>
         </div>
       </div>
@@ -88,7 +107,7 @@
 
     <div
       v-if="lifecycle===RequestLifecycle.REQUEST_LOCKED"
-      class="tw-absolute tw-inset-0 tw-bg-black/20 tw-animate-ping">
+      class="tw-absolute tw-inset-0 tw-bg-black/20 tw-animate-ping tw-pointer-events-none">
     </div>
   </div>
 </template>
@@ -120,9 +139,9 @@ const lifecycleProgress = computed<number>(()=>{
     case RequestLifecycle.PENDING:
       return (100/3)
     case RequestLifecycle.ACCEPTED_BY_SELLER:
-      return (100/3)
+      return props.accountType === AccountType.BUYER ? (100/3) : (100/3)*2
     case RequestLifecycle.ACCEPTED_BY_BUYER:
-      return (100/3)*2
+      return props.accountType === AccountType.BUYER ? (100/3)*2 : (100/3)*2
     case RequestLifecycle.REQUEST_LOCKED:
       return 100
     case RequestLifecycle.COMPLETED:
