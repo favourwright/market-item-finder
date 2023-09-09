@@ -25,8 +25,18 @@
         />
       </div>
 
-      <div v-else class="tw-text-center tw-py-20">
-        <p class="tw-text-4xl tw-text-black">loading...</p>
+      <div
+        v-else
+        class="tw-p-6 tw-py-10 tw-text-center tw-border-4 tw-border-gray-400/5 tw-rounded-2xl
+        tw-bg-gray-300/5 tw-my-10 tw-text-2xl tw-text-gray-500">
+        <p>loading...</p>
+      </div>
+
+      <div
+        v-if="!loading && !userRequestList.length"
+        class="tw-p-6 tw-py-10 tw-text-center tw-border-4 tw-border-gray-400/5 tw-rounded-2xl
+        tw-bg-gray-300/5 tw-my-10 tw-text-2xl tw-text-gray-500">
+        <p>No requests have been made in this location</p>
       </div>
     </div>
   </div>
