@@ -44,7 +44,7 @@
         </Tabs>
 
         <div class="tw-mt-6">
-          <div v-show="tab===tab_list[0].slug" class="tw-grid tw-gap-3">
+          <div v-show="tab===tab_list[0].slug" class="tw-grid sm:tw-grid-cols-2 tw-gap-3">
             <RequestItem
               v-for="request in activeRequestList" :key="request.id"
               :requestId="request.id!"
