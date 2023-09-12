@@ -68,7 +68,7 @@
           <div class="tw-space-x-4 tw-mt-3">
             <NuxtLink to="/">Terms of use</NuxtLink>
           </div>
-          <span>+234 903 2545 233</span>
+          <GitBadge text="favourwright" link="http://github.com/favourwright" />
         </div>
       </div>
     </footer>
@@ -81,6 +81,7 @@ import {
   signOut,
 } from 'firebase/auth'
 import { User, AccountType } from '@/types'
+import GitBadge from '@/components/GitBadge.vue';
 
 const auth = useFirebaseAuth() // only exists on client side
 const user = useCurrentUser()
