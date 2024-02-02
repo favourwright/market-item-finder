@@ -1,28 +1,29 @@
 require('dotenv').config()
+
+// Mailgun configuration
+const formData = require('form-data')
+const Mailgun  = require('mailgun.js')
+
+const { compile }  = require("handlebars")
+const { readFileSync }  = require("fs")
+
+// The Cloud Functions for Firebase SDK to create Cloud Functions and triggers.
+const { logger }  = require("firebase-functions")
+// const {onRequest} = require("firebase-functions/v2/https");
+const { onDocumentCreated }  = require("firebase-functions/v2/firestore")
+// The Firebase Admin SDK to access Firestore.
+const { initializeApp }  = require("firebase-admin/app")
+// const {getFirestore} = require("firebase-admin/firestore");
+initializeApp();
+
 const APP = {
   NAME: 'Squared Finance',
   URL: 'https://squaredfinance.com',
 }
-// Mailgun configuration
-import formData from 'form-data';
-import Mailgun from 'mailgun.js';
 const mailgun = new Mailgun(formData);
 const client = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY});
 
-import { compile } from "handlebars";
-import { readFileSync } from "fs";
-
-// The Cloud Functions for Firebase SDK to create Cloud Functions and triggers.
-import { logger } from "firebase-functions";
-// const {onRequest} = require("firebase-functions/v2/https");
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
-// The Firebase Admin SDK to access Firestore.
-import { initializeApp } from "firebase-admin/app";
-// const {getFirestore} = require("firebase-admin/firestore");
-initializeApp();
-
-
-export const welcomeEmail = onDocumentCreated({
+exports.welcomeEmail = onDocumentCreated({
   timeoutSeconds: 15,
   maxInstances: 10,
   document:"/users/{userId}"
