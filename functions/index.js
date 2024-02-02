@@ -1,31 +1,28 @@
+require('dotenv').config()
 const APP = {
   NAME: 'Squared Finance',
   URL: 'https://squaredfinance.com',
 }
 // Mailgun configuration
-const API_KEY = '8cfa71700116eb7939d79d2f032fc949-a3c55839-6406d62a';
-const DOMAIN = 'sandbox76bdc643d4d049f1bd938b1f469c1f0a.mailgun.org';
-const formData = require('form-data')
-const Mailgun = require('mailgun.js')
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
 const mailgun = new Mailgun(formData);
-const client = mailgun.client({username: 'api', key: API_KEY});
+const client = mailgun.client({username: 'api', key: process.env.MAILGUN_API_KEY});
 
-const handlebars = require("handlebars");
-const fs = require("fs");
+import { compile } from "handlebars";
+import { readFileSync } from "fs";
 
 // The Cloud Functions for Firebase SDK to create Cloud Functions and triggers.
-const {logger} = require("firebase-functions");
+import { logger } from "firebase-functions";
 // const {onRequest} = require("firebase-functions/v2/https");
-const {onDocumentCreated} = require("firebase-functions/v2/firestore");
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 // The Firebase Admin SDK to access Firestore.
-const {initializeApp} = require("firebase-admin/app");
+import { initializeApp } from "firebase-admin/app";
 // const {getFirestore} = require("firebase-admin/firestore");
 initializeApp();
 
 
-// Listen for new signups
-// then trigger a function to send a welcome email
-exports.welcomeEmail = onDocumentCreated({
+export const welcomeEmail = onDocumentCreated({
   timeoutSeconds: 15,
   maxInstances: 10,
   document:"/users/{userId}"
@@ -42,8 +39,8 @@ exports.welcomeEmail = onDocumentCreated({
 
 // Send a welcome email to the user
 function sendWelcomeEmail(user) {
-  const emailTemplateSource = fs.readFileSync("./template.hbs", "utf8");
-  const template = handlebars.compile(emailTemplateSource);
+  const emailTemplateSource = readFileSync("./template.hbs", "utf8");
+  const template = compile(emailTemplateSource);
   const v_data = {
     title: `<h1>Welcome to ${APP.NAME}</h1>`,
     contents: `
@@ -72,7 +69,7 @@ function sendWelcomeEmail(user) {
   };
 
 
-  client.messages.create(DOMAIN, messageData)
+  client.messages.create(process.env.MAILGUN_DOMAIN, messageData)
   .then((res) => {
     // console.log({res});
   })
